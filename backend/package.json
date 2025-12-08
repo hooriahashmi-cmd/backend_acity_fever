@@ -1,0 +1,19 @@
+{
+  "name": "bistro",
+  "version": "1.0.0",
+  "description": "Bistro Order Management System Backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hooriahashmi-cmd/bistro_campus_food_ordering.git"
+  },
+  "author": "Hooria Haider Hashmi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hooriahashmi-cmd/bistro_campus_food_ordering/issues"
+  },
+  "homepage": "https://github.com/hooriahashmi-cmd/bistro_campus_food_ordering#readme"
+}
