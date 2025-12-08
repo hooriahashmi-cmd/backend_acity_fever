@@ -3,7 +3,7 @@ const router = express.Router();
 const { pool } = require('../server');
 const { authenticateToken } = require('../middleware/auth');
 
-// Create order
+
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { items, subtotal, deliveryFee, total, userRoom } = req.body;
@@ -15,7 +15,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const orderCode = 'ORD' + Date.now();
 
-    // Create order
+ 
     const orderResult = await pool.query(
       `INSERT INTO orders 
        (order_code, user_id, subtotal, delivery_fee, total, user_email, user_room, user_name, status)
@@ -26,7 +26,6 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const order = orderResult.rows[0];
 
-    // Add order items
     for (const item of items) {
       await pool.query(
         `INSERT INTO order_items 
@@ -52,7 +51,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Get user's orders
+
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const user = req.user;
@@ -78,7 +77,7 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Get order by ID
+
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;

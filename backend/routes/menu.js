@@ -1,51 +1,33 @@
-const express = require('express');
-const router = express.Router();
-const { pool } = require('../server');
-
-// Get all menu items
-router.get('/', async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM menu_items WHERE is_available = true ORDER BY category, name'
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching menu:', error);
-    res.status(500).json({ error: 'Failed to fetch menu' });
-  }
-});
-
-// Get menu items by category
-router.get('/category/:category', async (req, res) => {
-  try {
-    const { category } = req.params;
-    const result = await pool.query(
-      'SELECT * FROM menu_items WHERE category = $1 AND is_available = true ORDER BY name',
-      [category]
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching menu by category:', error);
-    res.status(500).json({ error: 'Failed to fetch menu' });
-  }
-});
-
-// Get single menu item
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query(
-      'SELECT * FROM menu_items WHERE id = $1',
-      [id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Menu item not found' });
+module.exports = (pool) => {
+  const router = require('express').Router();
+  
+ 
+  router.get('/', async (req, res) => {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM menu_items WHERE is_available = true ORDER BY category, name'
+      );
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+      res.status(500).json({ error: error.message });
     }
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('Error fetching menu item:', error);
-    res.status(500).json({ error: 'Failed to fetch menu item' });
-  }
-});
+  });
+  
 
-module.exports = router;
+  router.post('/', async (req, res) => {
+    try {
+      const { name, description, price, category, image_url } = req.body;
+      const result = await pool.query(
+        'INSERT INTO menu_items (name, description, price, category, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, description, price, category, image_url]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error creating menu item:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  return router;
+};
