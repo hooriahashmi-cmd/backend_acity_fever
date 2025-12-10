@@ -7,6 +7,8 @@ const authenticateToken = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
   }
+  
+// Verify token validity
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
@@ -17,6 +19,8 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Middleware to authenticate admin users
+
 const authenticateAdmin = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -24,6 +28,8 @@ const authenticateAdmin = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
   }
+  
+  // Verified token and checked for admin role
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {

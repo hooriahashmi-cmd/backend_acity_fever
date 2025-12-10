@@ -14,16 +14,18 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/admin', require('./routes/admin'));
 
 
+// Health Check Endpoint
 app.get('/api/health', async (req, res) => {
   try {
-    // Test database connection
+
+    // Tested database connection and returned status
     await pool.query('SELECT NOW()');
     res.json({ 
       status: 'healthy', 
@@ -49,7 +51,7 @@ app.get('/', (req, res) => {
   });
 });
 
-
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(err.status || 500).json({
@@ -60,7 +62,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({
     error: {
