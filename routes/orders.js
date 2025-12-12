@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../server');
+const pool = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 
 
@@ -15,7 +15,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const orderCode = 'ORD' + Date.now();
 
- 
+
     const orderResult = await pool.query(
       `INSERT INTO orders 
        (order_code, user_id, subtotal, delivery_fee, total, user_email, user_room, user_name, status)

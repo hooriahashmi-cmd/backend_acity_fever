@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../server');
+const pool = require('../config/database');
 
-// Register and Login
+// Register
 router.post('/register', async (req, res) => {
   try {
     const { email, name, password, room_number } = req.body;
@@ -13,7 +13,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Check if user already exists and return error if so
+    // Check if user already exists
     const userExists = await pool.query(
       'SELECT * FROM users WHERE email = $1',
       [email]
@@ -23,10 +23,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
-    // Hash password for privacy
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Created  user
+    // Create user
     const result = await pool.query(
       'INSERT INTO users (email, name, password, room_number) VALUES ($1, $2, $3, $4) RETURNING id, email, name, room_number',
       [email, name, hashedPassword, room_number]
@@ -34,6 +34,7 @@ router.post('/register', async (req, res) => {
 
     const user = result.rows[0];
 
+    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: 'user' },
       process.env.JWT_SECRET,
@@ -41,18 +42,19 @@ router.post('/register', async (req, res) => {
     );
 
     res.json({
-      message: 'Account created successfully...yayy',
+      message: 'Account created successfully',
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        roomNumber: user.room_number
+        room_number: user.room_number
       },
       token
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Registration failed', details: error.message });
   }
 });
 
@@ -97,7 +99,7 @@ router.post('/login', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        roomNumber: user.room_number
+        room_number: user.room_number
       },
       token
     });
@@ -128,6 +130,7 @@ router.post('/admin-login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Generate JWT token
     const token = jwt.sign(
       { username: username, role: 'admin' },
       process.env.JWT_SECRET,

@@ -5,53 +5,48 @@ const pool = require('./config/database'); // ← CHANGED HERE
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || '*',
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
 
-// Routes
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/admin', require('./routes/admin'));
 
 
-// Health Check Endpoint
 app.get('/api/health', async (req, res) => {
   try {
-
-    // Tested database connection and returned status
+    // Test database connection
     await pool.query('SELECT NOW()');
-    res.json({ 
-      status: 'healthy', 
+    res.json({
+      status: 'healthy',
       timestamp: new Date().toISOString(),
       database: 'connected',
       environment: process.env.NODE_ENV || 'development'
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
-      error: error.message 
+      error: error.message
     });
   }
 });
 
 
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Bistro API is running', 
+  res.json({
+    message: 'Bistro API is running',
     docs: '/api/health for health check'
   });
 });
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(err.status || 500).json({
@@ -62,7 +57,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 Handler
+
 app.use((req, res) => {
   res.status(404).json({
     error: {

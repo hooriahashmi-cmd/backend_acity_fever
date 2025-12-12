@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../server');
+const pool = require('../config/database');
 const { authenticateAdmin } = require('../middleware/auth');
 
-// Get all orders from all users
+// Get all orders
 router.get('/orders', authenticateAdmin, async (req, res) => {
   try {
     const result = await pool.query(
@@ -18,7 +18,6 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
        ORDER BY o.created_at DESC`
     );
 
-    // Returned all orders with their items
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -26,7 +25,7 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Update order status during order processing
+// Update order status
 router.patch('/orders/:id/status', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,16 +51,16 @@ router.patch('/orders/:id/status', authenticateAdmin, async (req, res) => {
     }
 
     res.json({
-      message: 'Order status updated and done',
+      message: 'Order status updated',
       order: result.rows[0]
     });
   } catch (error) {
     console.error('Error updating order:', error);
-    res.status(500).json({ error: 'Failed to update order, try again' });
+    res.status(500).json({ error: 'Failed to update order' });
   }
 });
 
-// Get dashboard statistics for admin view
+// Get dashboard statistics
 router.get('/stats', authenticateAdmin, async (req, res) => {
   try {
     const statsResult = await pool.query(`
